@@ -19,7 +19,11 @@ public class TPLList {
 	}
 	
 	public void addAll(TPLList list) {
-		this.list.addAll(getList());
+		this.list.addAll(list.getList());
+	}
+	
+	public void remove(int index) {
+		this.list.remove(index);
 	}
 	
 	public List<Value> getList(){
@@ -32,5 +36,12 @@ public class TPLList {
 	
 	public String toString() {
 		return String.valueOf(list);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		TPLList out = (TPLList) obj;
+		
+		return this.list.equals(out.list);
 	}
 }

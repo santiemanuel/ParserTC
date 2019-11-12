@@ -12,7 +12,7 @@ assign : IDENT ASSIGN_OP expression;
 
 print : PRINT expression;
 
-expression : intExpr | setExpr | listExpr | textExpr ;
+expression : intExpr | setExpr | listExpr | textExpr | boolExpr;
 
 intExpr : left=intTerm (op=(PLUS | MINUS) right=intExpr)*;
 
@@ -46,6 +46,13 @@ setExt : OP_BRACE (exprList)? CL_BRACE;
 
 exprList : expression (COMMA expression)*;
 
+boolExpr: left=boolTerm ((op=(EQUALS|NOTEQ|LT|LTEQ|GT|GTEQ)) right=boolTerm)*;
+
+boolTerm: id=IDENT				#idBoolExpr
+		| BOOLEAN				#boolAtom
+		| intExpr				#intBoolExpr
+	;
+
 textTerm : TEXT;
 
 PLUS : '+';
@@ -63,13 +70,20 @@ DOT : '.';
 COMMA : ',';
 COLON : ':';
 ASSIGN_OP : '=';
+EQUALS : '==';
+NOTEQ : '!=';
+LT : '<';
+LTEQ : '<=';
+GT : '>';
+GTEQ : '>=';
 OP_PAREN : '(';
 CL_PAREN : ')';
 OP_BRACE : '{';
 CL_BRACE : '}';
 OP_BRACK : '[';
 CL_BRACK : ']';
- 
+
+BOOLEAN : 'true'|'false';
 IDENT : [a-z]+ ;             // match lower-case identifiers
 NUM : [0-9]+;
 TEXT : '"' (~["\r\n] | '""')* '"';

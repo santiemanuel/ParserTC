@@ -1,7 +1,5 @@
 package core;
 
-import java.util.List;
-
 public class Value {
 	public static Value VOID = new Value(new Object());
 	
@@ -27,13 +25,30 @@ public class Value {
 		return value instanceof String;
 	}
 	
+	public Boolean asBoolean() {
+		return (Boolean) value;
+	}
+	
+	public boolean isBoolean() {
+		return value instanceof Boolean;
+	}
 	
 	public TPLList asList(){
 		return (TPLList) value;
 	}
 	
+	
 	public boolean isList() {
 		return value instanceof TPLList;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		Value out=(Value) obj;
+		
+		return this.value.equals(out.value);
 	}
 	
     @Override

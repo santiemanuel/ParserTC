@@ -142,6 +142,33 @@ public interface ParserTCVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExprList(ParserTCParser.ExprListContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link ParserTCParser#boolExpr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBoolExpr(ParserTCParser.BoolExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code idBoolExpr}
+	 * labeled alternative in {@link ParserTCParser#boolTerm}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdBoolExpr(ParserTCParser.IdBoolExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code boolAtom}
+	 * labeled alternative in {@link ParserTCParser#boolTerm}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBoolAtom(ParserTCParser.BoolAtomContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code intBoolExpr}
+	 * labeled alternative in {@link ParserTCParser#boolTerm}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIntBoolExpr(ParserTCParser.IntBoolExprContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link ParserTCParser#textTerm}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

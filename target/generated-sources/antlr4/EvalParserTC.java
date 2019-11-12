@@ -39,8 +39,6 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 			 return new Value(result.asList());
 		 }
 		 
-		 if (left.isInteger()) return new Value(left.asInteger());
-		 if (left.isString()) return new Value(left.asString());
 		 else return new Value(left.asList());
 		 	 
 	}
@@ -65,6 +63,7 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 			if (left.isList()) return new Value(left.asList());
 			if (left.isInteger()) return new Value(left.asInteger());
 			if (left.isString()) return new Value(left.asString());
+			if (left.isBoolean()) return new Value(left.asBoolean());
 			return null;
 		}
 
@@ -112,8 +111,6 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 			if (list.get(index).isString()) return new Value(list.get(index).asString());
 			else return new Value(list.get(index).asList());
 		}
-		
-		
 	}
 	
 	@Override public Value visitIndex(ParserTCParser.IndexContext ctx) {
@@ -141,7 +138,6 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 
 	@Override public Value visitIntTerm(ParserTCParser.IntTermContext ctx) {
 		
-		
 		Value left = this.visit(ctx.left);
 		if (ctx.right != null) {
 			Value right = this.visit(ctx.right);
@@ -164,6 +160,7 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 			if (left.isList()) return new Value(left.asList());
 			if (left.isInteger()) return new Value(left.asInteger());
 			if (left.isString()) return new Value(left.asString());
+			if (left.isBoolean()) return new Value(left.asBoolean());
 			return null;
 		}		
 	}
@@ -173,7 +170,6 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 		String ident = ctx.id.getText();
 		Value value = memory.get(ident);
 		if (value == null) {
-			System.out.print("NULL");
 			throw new RuntimeException("La variable "+ident+" no existe." );
 		}
 		if (ctx.idpos == null) {
@@ -202,7 +198,101 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 	@Override public Value visitUnaryExpr(ParserTCParser.UnaryExprContext ctx) {
 		return new Value(-1 * this.visit(ctx.inminus).asInteger());
 	}
-
+	
+	@Override public Value visitBoolExpr(ParserTCParser.BoolExprContext ctx) {
+		
+		if (ctx.right != null) {
+			
+			switch(ctx.op.getType()) {
+				case ParserTCParser.LT : return lessThan(ctx);
+				case ParserTCParser.LTEQ : return lessEqThan(ctx);
+				case ParserTCParser.GT : return greaterThan(ctx);
+				case ParserTCParser.GTEQ : return greaterEqThan(ctx);
+				case ParserTCParser.EQUALS : return eq(ctx);
+				case ParserTCParser.NOTEQ : return notEq(ctx);
+			}
+		} else
+		{
+			Value left = this.visit(ctx.left);
+			return left;
+		}
+		return null;
+		
+	}
+	
+	private Value lessThan(ParserTCParser.BoolExprContext ctx) {
+		Value left = this.visit(ctx.left);
+		Value right = this.visit(ctx.right);
+		
+		if (left.isInteger() && right.isInteger())
+			return new Value(left.asInteger() < right.asInteger());
+		throw new RuntimeException("Solo se puede comparar numeros.");
+	}
+	
+	private Value lessEqThan(ParserTCParser.BoolExprContext ctx) {
+		Value left = this.visit(ctx.left);
+		Value right = this.visit(ctx.right);
+		
+		if (left.isInteger() && right.isInteger())
+			return new Value(left.asInteger() <= right.asInteger());
+		throw new RuntimeException("Solo se puede comparar numeros.");
+	}
+	
+	private Value greaterThan(ParserTCParser.BoolExprContext ctx) {
+		Value left = this.visit(ctx.left);
+		Value right = this.visit(ctx.right);
+		
+		if (left.isInteger() && right.isInteger())
+			return new Value(left.asInteger() > right.asInteger());
+		throw new RuntimeException("Solo se puede comparar numeros.");
+	}
+	
+	private Value greaterEqThan(ParserTCParser.BoolExprContext ctx) {
+		Value left = this.visit(ctx.left);
+		Value right = this.visit(ctx.right);
+		
+		if (left.isInteger() && right.isInteger())
+			return new Value(left.asInteger() >= right.asInteger());
+		throw new RuntimeException("Solo se puede comparar numeros.");
+	}
+	
+	private Value eq(ParserTCParser.BoolExprContext ctx) {
+		Value left = this.visit(ctx.left);
+		Value right = this.visit(ctx.right);
+		
+		if ((left.isBoolean() && right.isBoolean()) ||
+			(left.isInteger() && right.isInteger()) ||
+			(left.isString() && right.isString()) ||
+			(left.isList() && right.isList()))
+			return new Value(left.equals(right));
+		throw new RuntimeException("No se pueden comparar distintos tipos.");
+	}
+	
+	private Value notEq(ParserTCParser.BoolExprContext ctx) {
+		Value left = this.visit(ctx.left);
+		Value right = this.visit(ctx.right);
+		
+		if ((left.isBoolean() && right.isBoolean()) ||
+			(left.isInteger() && right.isInteger()) ||
+			(left.isString() && right.isString()) ||
+			(left.isList() && right.isList()))
+			return new Value(!left.equals(right));
+		throw new RuntimeException("No se pueden comparar distintos tipos.");
+	}
+	
+	@Override public Value visitBoolAtom(ParserTCParser.BoolAtomContext ctx) {
+		return new Value(Boolean.valueOf(ctx.getText()));
+	}
+	
+	@Override public Value visitIdBoolExpr(ParserTCParser.IdBoolExprContext ctx) {
+		
+		String ident = ctx.id.getText();
+		Value value = memory.get(ident);
+		if (value == null) {
+			throw new RuntimeException("La variable "+ident+" no existe." );
+		} else return value;
+	}
+	
 	@Override public Value visitTextTerm(ParserTCParser.TextTermContext ctx) {
 		String str = ctx.getText();
 		

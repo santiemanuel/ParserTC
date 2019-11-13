@@ -7,7 +7,7 @@ public class TestValue {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		TPLList elem1 = new TPLList();
+		/*TPLList elem1 = new TPLList();
 		TPLList elem2 = new TPLList();
 		Value val1 = new Value(new String("Holi"));
 		Value val0 = new Value(new String("holi"));
@@ -28,7 +28,12 @@ public class TestValue {
 		
 		System.out.println(list1.equals(list2)+" "+list1.toString()+" "+list2.toString());
 		list2.asList().remove(1);
-		System.out.println(list1.equals(list2)+" "+list1.toString()+" "+list2.toString());
+		System.out.println(list1.equals(list2)+" "+list1.toString()+" "+list2.toString());*/
+		
+		String text = "Hola";
+		text = text+5;
+		
+		System.out.print(text);
 	}
 
 }

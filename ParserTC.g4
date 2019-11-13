@@ -8,58 +8,40 @@ listStmt : stmt SEMICOLON (stmt SEMICOLON)*;
 
 stmt : assign | expression | print ;
 
-assign : IDENT ASSIGN_OP expression;
+assign : id=IDENT idpos=index? ASSIGN_OP expression;
 
 print : PRINT expression;
 
-expression : intExpr | setExpr | listExpr | textExpr | boolExpr;
-
-intExpr : left=intTerm (op=(PLUS | MINUS) right=intExpr)*;
-
-textExpr : left=textTerm (DOT right=textExpr)*;
-
-intTerm : left=intFactor (op=(MULTI | DIVI | MOD) right=intTerm )*;
-
-intFactor : id=IDENT idpos=index?				#idExpr
-		  | num=NUM 	 	 					#numExpr
-		  | OP_PAREN inparen=intExpr CL_PAREN   #parExpr
-		  | MINUS inminus=intFactor				#unaryExpr
-		  ;
-		  
-setExpr : left=setTerm ( (UNION | INTER | DIFF) right=setExpr)*;
-
-listExpr : left=listTerm (COLON right=listExpr)*; 
-
-listTerm : id=IDENT idpos=index?		#listIdExpr 
-		 | list=listExt		#listExtExpr
-		 ;
-
-index : OP_BRACK val=intExpr CL_BRACK;
-
-listExt : OP_BRACK (exprList)? CL_BRACK;
-		 
-setTerm :  IDENT 				     		
-		 | setExt 
-		 | OP_PAREN setExpr CL_PAREN;
-
-setExt : OP_BRACE (exprList)? CL_BRACE;
+expression :  MINUS expr=expression													#unaryExpr
+			 | <assoc=right> left=expression POW right=expression					#powExpr
+			 | left=expression op=(LT|LTEQ|GT|GTEQ) right=expression				#boolExpr
+			 | left=expression op=(MULTI|DIVI|MOD) right=expression					#multExpr
+			 | left=expression op=(PLUS|MINUS) right=expression						#sumExpr
+			 | left=expression op=(EQUALS|NOTEQ) right=expression					#eqExpr
+			 | left=expression op=(AND|OR) right=expression							#andOrExpr
+			 | left=expression op=DOT right=expression								#strExpr
+			 | NUM																	#numExpr
+			 | BOOLEAN																#boolAtomExpr
+			 | TEXT idpos=index?													#textExpr
+			 | OP_PAREN inparen=expression CL_PAREN									#parExpr
+			 | id=IDENT idpos=index?												#idExpr
+			 | OP_BRACE (exprList)? CL_BRACE										#setExpr
+			 | left=expression op=(UNION|INTER|DIFF) right=expression				#setOpExpr
+			 | OP_BRACK (exprList)? CL_BRACK										#listExpr
+			 | left=expression COLON right=expression								#joinListExpr
+			 ; 
+			 
+index : OP_BRACK val=expression CL_BRACK;
 
 exprList : expression (COMMA expression)*;
 
-boolExpr: left=boolTerm ((op=(EQUALS|NOTEQ|LT|LTEQ|GT|GTEQ)) right=boolTerm)*;
-
-boolTerm: id=IDENT				#idBoolExpr
-		| BOOLEAN				#boolAtom
-		| intExpr				#intBoolExpr
-	;
-
-textTerm : TEXT;
 
 PLUS : '+';
 MINUS : '-';
 MULTI : '*';
 DIVI : '/';
 MOD : '%';
+POW : '^';
 QUOTE : '\'';
 UNION : 'union';
 INTER : 'intersection';
@@ -72,6 +54,8 @@ COLON : ':';
 ASSIGN_OP : '=';
 EQUALS : '==';
 NOTEQ : '!=';
+AND : '&&';
+OR : '||';
 LT : '<';
 LTEQ : '<=';
 GT : '>';
@@ -84,7 +68,7 @@ OP_BRACK : '[';
 CL_BRACK : ']';
 
 BOOLEAN : 'true'|'false';
-IDENT : [a-z]+ ;             // match lower-case identifiers
+IDENT : [a-zA-Z]+ ;             // match lower-case identifiers
 NUM : [0-9]+;
 TEXT : '"' (~["\r\n] | '""')* '"';
 

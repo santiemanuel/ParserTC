@@ -1,10 +1,6 @@
-/**
- * Define a grammar called Hello
- */
 grammar ParserTC;
 
-
-listStmt : stmt SEMICOLON (stmt SEMICOLON)*;
+listStmt : (stmt SEMICOLON)+;
 
 stmt : assign | expression | print ;
 
@@ -12,23 +8,23 @@ assign : id=IDENT idpos=index? ASSIGN_OP expression;
 
 print : PRINT expression;
 
-expression :  MINUS expr=expression													#unaryExpr
-			 | <assoc=right> left=expression POW right=expression					#powExpr
-			 | left=expression op=(LT|LTEQ|GT|GTEQ) right=expression				#boolExpr
-			 | left=expression op=(MULTI|DIVI|MOD) right=expression					#multExpr
-			 | left=expression op=(PLUS|MINUS) right=expression						#sumExpr
-			 | left=expression op=(EQUALS|NOTEQ) right=expression					#eqExpr
-			 | left=expression op=(AND|OR) right=expression							#andOrExpr
-			 | left=expression op=DOT right=expression								#strExpr
-			 | NUM																	#numExpr
-			 | BOOLEAN																#boolAtomExpr
-			 | TEXT idpos=index?													#textExpr
-			 | OP_PAREN inparen=expression CL_PAREN									#parExpr
-			 | id=IDENT idpos=index?												#idExpr
-			 | OP_BRACE (exprList)? CL_BRACE										#setExpr
-			 | left=expression op=(UNION|INTER|DIFF) right=expression				#setOpExpr
-			 | OP_BRACK (exprList)? CL_BRACK										#listExpr
-			 | left=expression COLON right=expression								#joinListExpr
+expression :  MINUS expr=expression										#unaryExpr
+			 | <assoc=right> left=expression POW right=expression		#powExpr
+			 | left=expression op=(LT|LTEQ|GT|GTEQ) right=expression	#compExpr
+			 | left=expression op=(MULTI|DIVI|MOD) right=expression		#multExpr
+			 | left=expression op=(PLUS|MINUS) right=expression			#sumExpr
+			 | left=expression op=(EQUALS|NOTEQ) right=expression		#eqExpr
+			 | left=expression op=(AND|OR) right=expression				#andOrExpr
+			 | left=expression op=DOT right=expression					#strExpr
+			 | NUM														#numExpr
+			 | BOOLEAN													#boolAtomExpr
+			 | TEXT 													#textExpr
+			 | OP_PAREN inparen=expression CL_PAREN						#parExpr
+			 | id=IDENT idpos=index?									#idExpr
+			 | OP_BRACE (exprList)? CL_BRACE							#setExpr
+			 | left=expression op=(UNION|INTER|DIFF) right=expression	#setOpExpr
+			 | OP_BRACK (exprList)? CL_BRACK							#listExpr
+			 | left=expression COLON right=expression					#joinListExpr
 			 ; 
 			 
 index : OP_BRACK val=expression CL_BRACK;

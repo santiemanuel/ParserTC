@@ -2,6 +2,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import core.TPLList;
+import core.TPLSet;
 import core.Value;
 
 public class EvalParserTC extends ParserTCBaseVisitor<Value> {
@@ -16,7 +17,6 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 		 Value value = this.visit(ctx.expression());
 		 memory.put(ident, value);
 		 return value;
-		 
 	}
 	
 	@Override public Value visitUnaryExpr(ParserTCParser.UnaryExprContext ctx) {
@@ -46,7 +46,7 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 		return res;
 	}
 	
-	@Override public Value visitBoolExpr(ParserTCParser.BoolExprContext ctx) {
+	@Override public Value visitCompExpr(ParserTCParser.CompExprContext ctx) {
 		switch(ctx.op.getType()) {
 			case ParserTCParser.LT : return lessThan(ctx);
 			case ParserTCParser.LTEQ : return lessEqThan(ctx);
@@ -56,7 +56,7 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 		}
 	}
 	
-	private Value lessThan(ParserTCParser.BoolExprContext ctx) {
+	private Value lessThan(ParserTCParser.CompExprContext ctx) {
 		Value left = this.visit(ctx.left);
 		Value right = this.visit(ctx.right);
 		
@@ -65,7 +65,7 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 		throw new RuntimeException("Solo se puede comparar numeros.");
 	}
 	
-	private Value lessEqThan(ParserTCParser.BoolExprContext ctx) {
+	private Value lessEqThan(ParserTCParser.CompExprContext ctx) {
 		Value left = this.visit(ctx.left);
 		Value right = this.visit(ctx.right);
 		
@@ -74,7 +74,7 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 		throw new RuntimeException("Solo se puede comparar numeros.");
 	}
 	
-	private Value greaterThan(ParserTCParser.BoolExprContext ctx) {
+	private Value greaterThan(ParserTCParser.CompExprContext ctx) {
 		Value left = this.visit(ctx.left);
 		Value right = this.visit(ctx.right);
 		
@@ -83,7 +83,7 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 		throw new RuntimeException("Solo se puede comparar numeros.");
 	}
 	
-	private Value greaterEqThan(ParserTCParser.BoolExprContext ctx) {
+	private Value greaterEqThan(ParserTCParser.CompExprContext ctx) {
 		Value left = this.visit(ctx.left);
 		Value right = this.visit(ctx.right);
 		
@@ -183,7 +183,8 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 		if ((left.isBoolean() && right.isBoolean()) ||
 			(left.isInteger() && right.isInteger()) ||
 			(left.isString() && right.isString()) ||
-			(left.isList() && right.isList()))
+			(left.isList() && right.isList()) ||
+			(left.isSet() && right.isSet()))
 			return new Value(left.equals(right));
 		throw new RuntimeException("No se pueden comparar distintos tipos.");
 	}
@@ -244,25 +245,51 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 		}else
 		{
 			Value element = this.visit(ctx.idpos);
-			Integer index = element.asInteger(); 
-			TPLList list = value.asList();
-			if (index >= list.size())
-				throw new RuntimeException("Indice "+index+" fuera del rango." );
-			if (list.get(index).isInteger()) return new Value(list.get(index).asInteger());
-			if (list.get(index).isString()) return new Value(list.get(index).asString());
-			if (list.get(index).isBoolean()) return new Value(list.get(index).asBoolean());
-			if (list.get(index).isList()) return new Value(list.get(index).asList());
+			Integer index = element.asInteger();
+			if (value.isList()) {
+				TPLList list = value.asList();
+				if (index >= list.size())
+					throw new RuntimeException("Indice "+index+" fuera del rango." );
+				if (list.get(index).isInteger()) return new Value(list.get(index).asInteger());
+				if (list.get(index).isString()) return new Value(list.get(index).asString());
+				if (list.get(index).isBoolean()) return new Value(list.get(index).asBoolean());
+				if (list.get(index).isList()) return new Value(list.get(index).asList());
+				if (list.get(index).isSet()) return new Value(list.get(index).asSet());
+			}
+			if (value.isString()) {
+				String str = value.asString();
+				if (index >= str.length())
+					throw new RuntimeException("Indice "+index+" fuera del rango." );
+				return new Value(Character.toString(str.charAt(index)));
+			}
+			
 			throw new RuntimeException("Problema de tipos.");
 			
 		}
 	}
 	
 	@Override public Value visitSetExpr(ParserTCParser.SetExprContext ctx) {
-		return visitChildren(ctx); //TODO
+		TPLSet set = new TPLSet();
+		
+		if (ctx.exprList() != null)
+		{
+			for (ParserTCParser.ExpressionContext expr : ctx.exprList().expression())
+				set.add(this.visit(expr));
+		}
+		
+		return new Value(set);
+			
 	}
 	
 	@Override public Value visitSetOpExpr(ParserTCParser.SetOpExprContext ctx) {
-		return visitChildren(ctx); //TODO
+		Value left = this.visit(ctx.left);
+		Value right = this.visit(ctx.right);
+		switch(ctx.op.getType()) {
+			case ParserTCParser.UNION : return new Value(left.asSet().union(right.asSet()));
+			case ParserTCParser.INTER : return new Value(left.asSet().intersection(right.asSet()));
+			case ParserTCParser.DIFF : return new Value(left.asSet().difference(right.asSet()));
+			default: throw new RuntimeException("Simbolo desconocido");
+		}
 	}
 	
 	@Override public Value visitListExpr(ParserTCParser.ListExprContext ctx) {

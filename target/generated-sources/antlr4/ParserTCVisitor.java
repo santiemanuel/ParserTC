@@ -90,6 +90,13 @@ public interface ParserTCVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSumExpr(ParserTCParser.SumExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code compExpr}
+	 * labeled alternative in {@link ParserTCParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCompExpr(ParserTCParser.CompExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code setOpExpr}
 	 * labeled alternative in {@link ParserTCParser#expression}.
 	 * @param ctx the parse tree
@@ -124,13 +131,6 @@ public interface ParserTCVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPowExpr(ParserTCParser.PowExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code boolExpr}
-	 * labeled alternative in {@link ParserTCParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBoolExpr(ParserTCParser.BoolExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code listExpr}
 	 * labeled alternative in {@link ParserTCParser#expression}.

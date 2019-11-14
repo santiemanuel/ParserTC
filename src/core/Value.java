@@ -42,6 +42,14 @@ public class Value {
 		return value instanceof TPLList;
 	}
 	
+	public TPLSet asSet() {
+		return (TPLSet) value;
+	}
+	
+	public boolean isSet() {
+		return value instanceof TPLSet;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

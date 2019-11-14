@@ -28,6 +28,7 @@ public class ParserTest {
 			//System.out.println(tree.toStringTree(parser));
 			System.out.println(result.toString());
 		}
+		in.close();
 		
 			
 	}

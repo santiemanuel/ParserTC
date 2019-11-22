@@ -27,7 +27,7 @@ expression :  MINUS expr=expression										#unaryExpr
 			 | left=expression COLON right=expression					#joinListExpr
 			 ; 
 			 
-index : OP_BRACK val=expression CL_BRACK;
+index : (OP_BRACK val=expression CL_BRACK)+;
 
 exprList : expression (COMMA expression)*;
 
@@ -67,5 +67,4 @@ BOOLEAN : 'true'|'false';
 IDENT : [a-zA-Z]+ ;             // match lower-case identifiers
 NUM : [0-9]+;
 TEXT : '"' (~["\r\n] | '""')* '"';
-
-WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
+WS : [ \t\r\n]+ -> skip ;

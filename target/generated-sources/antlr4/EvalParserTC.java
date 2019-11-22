@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import core.TPLList;
@@ -237,35 +238,26 @@ public class EvalParserTC extends ParserTCBaseVisitor<Value> {
 	@Override public Value visitIdExpr(ParserTCParser.IdExprContext ctx) {
 		String ident = ctx.IDENT().getText();
 		Value value = memory.get(ident);
-		if (value == null) {
-			throw new RuntimeException("La variable "+ident+" no existe." );
+		
+		if (ctx.idpos != null) {
+			List<ParserTCParser.ExpressionContext> exprs = ctx.idpos.expression();
+			value = retIndex(value, exprs);
 		}
-		if (ctx.idpos == null) {
-			return value;
-		}else
-		{
-			Value element = this.visit(ctx.idpos);
-			Integer index = element.asInteger();
-			if (value.isList()) {
-				TPLList list = value.asList();
-				if (index >= list.size())
-					throw new RuntimeException("Indice "+index+" fuera del rango." );
-				if (list.get(index).isInteger()) return new Value(list.get(index).asInteger());
-				if (list.get(index).isString()) return new Value(list.get(index).asString());
-				if (list.get(index).isBoolean()) return new Value(list.get(index).asBoolean());
-				if (list.get(index).isList()) return new Value(list.get(index).asList());
-				if (list.get(index).isSet()) return new Value(list.get(index).asSet());
-			}
-			if (value.isString()) {
-				String str = value.asString();
-				if (index >= str.length())
-					throw new RuntimeException("Indice "+index+" fuera del rango." );
-				return new Value(Character.toString(str.charAt(index)));
-			}
-			
-			throw new RuntimeException("Problema de tipos.");
-			
+		
+		return value;
+	}
+	
+	private Value retIndex(Value val, List<ParserTCParser.ExpressionContext> indexes) {
+		
+		for (ParserTCParser.ExpressionContext expr: indexes) {
+			Value index = this.visit(expr);
+			if (!index.isInteger())
+				throw new RuntimeException("No se puede resolver el indice.");
+			int i = index.asInteger();
+			val = val.asList().get(i);
 		}
+		
+		return val;
 	}
 	
 	@Override public Value visitSetExpr(ParserTCParser.SetExprContext ctx) {
